@@ -1,14 +1,30 @@
 import './styles.css';
-import React, {useState } from "react";
+import React, {useEffect, useState } from "react";
 
 function App () {
     const [red, setRed] = useState(false);
     const [blue, setBlue] = useState(false);
     const [green, setGreen] = useState(false);
+    const [listening, setListening] = useState(false);
+
+    useEffect(() => {
+        if (!listening) {
+            const events = new EventSource('/webClients');
+
+            events.onmessage = (event) => {
+                const parsedData = JSON.parse(event.data)
+                setRed(parsedData.red)
+                setBlue(parsedData.blue)
+                setGreen(parsedData.green)
+            }
+            setListening(true);
+        }
+    }, [listening,red, blue, green])
+
     return (<>
         <h1>ESP32 LED Control Panel</h1>
         <div id="main-container">
-            <Red red={red} setRed={setRed}/>
+            <Red red={red} setRed={setRed} />
             <Blue blue={blue} setBlue={setBlue}/>
             <Green green={green} setGreen={setGreen}/>
         </div>
@@ -21,15 +37,9 @@ function Red (props){
     const styles = props.red ? "on" : "off"
     function onClick(){
         const extension = props.red ? "redOff" : "redOn"
-        var response = fetch(`${extension}`, {
+        fetch(`${extension}`, {
             method: "POST"
         });
-        response.then(() => {
-            props.setRed(!props.red)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
     }
 
     return <>
@@ -44,16 +54,9 @@ function Blue (props) {
     const styles = props.blue ? "on" : "off"
     function onClick(){
         const extension = props.blue ? "/blueOff" : "blueOn"
-        var response = fetch(`${extension}`, {
+        fetch(`${extension}`, {
             method: "POST"
         });
-
-        response.then(() => {
-            props.setBlue(!props.blue)
-        })
-        .catch((error) => {
-            console.log(error)
-        })
     }
 
     return <>
@@ -68,16 +71,9 @@ function Green (props) {
     const styles = props.green ? "on" : "off"
     function onClick(){
         const extension = props.green ? "/greenOff" : "greenOn"
-        var response = fetch(`${extension}`, {
+        fetch(`${extension}`, {
             method: "POST"
         });
-
-        response.then(() => {
-            props.setGreen(!props.green)
-        })
-        .catch((error) => {
-            console.log(error)
-        })
     }
 
     return <>
