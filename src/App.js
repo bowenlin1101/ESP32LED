@@ -1,15 +1,14 @@
 import './styles.css';
 import React, {useCallback, useEffect, useState } from "react";
 
-
 function App () {
     const [red, setRed] = useState(false);
     const [blue, setBlue] = useState(false);
     const [green, setGreen] = useState(false);
-    const [listening, setListening] = useState(false);
+    const [listeningLED, setListeningLED] = useState(false);
 
     useEffect(() => {
-        if (!listening) {
+        if (!listeningLED) {
             const events = new EventSource('/webClients');
 
             events.onmessage = (event) => {
@@ -18,22 +17,28 @@ function App () {
                 setBlue(parsedData.blue)
                 setGreen(parsedData.green)
             }
-            setListening(true);
+            setListeningLED(true);
         }
-    }, [listening,red, blue, green])
-
+    }, [listeningLED,red, blue, green])
+    
     return (<>
         <h1>ESP32 LED Control Panel</h1>
         <div id="main-container">
-            <Red red={red} setRed={setRed} />
-            <Blue blue={blue} setBlue={setBlue}/>
-            <Green green={green} setGreen={setGreen}/>
+            <div id="control-panel">
+                <Red red={red} setRed={setRed} />
+                <Blue blue={blue} setBlue={setBlue}/>
+                <Green green={green} setGreen={setGreen}/>
+            </div>
+            <div id="video">
+                <img src='/videoClients'></img>
+
+            </div>
         </div>
+        
     </>)
 }
 
 function Red (props){
-    const state = props.red ? "Current state: On" : "Current state: Off"
     const text = props.red ? "Turn Off" : "Turn On"
     const styles = props.red ? "on" : "off"
     function onClick(red){
@@ -48,13 +53,11 @@ function Red (props){
     ,[])
 
     return <>
-        <h2>{state}</h2>
         <button className={`red-button ${styles}`} onClick={() => debouncedClick(props.red)}>{text}</button>
     </>
 }
 
 function Blue (props) {
-    const state = props.blue ? "Current state: On" : "Current state: Off"
     const text = props.blue ? "Turn Off" : "Turn On"
     const styles = props.blue ? "on" : "off"
     function onClick(blue){
@@ -69,13 +72,11 @@ function Blue (props) {
     ,[])
 
     return <>
-        <h2>{state}</h2>
         <button className={`blue-button ${styles}`} onClick={() => debouncedClick(props.blue)}>{text}</button>
     </>
 }
   
 function Green (props) {
-    const state = props.green ? "Current state: On" : "Current state: Off"
     const text = props.green ? "Turn Off" : "Turn On"
     const styles = props.green ? "on" : "off"
     function onClick(green){
@@ -90,7 +91,6 @@ function Green (props) {
     ,[])
 
     return <>
-        <h2>{state}</h2>
         <button className={`green-button ${styles}`} onClick={() => debouncedClick(props.green)}>{text}</button>
     </>
 }
