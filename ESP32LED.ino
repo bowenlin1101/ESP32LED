@@ -11,7 +11,7 @@ WiFiMulti wifiMulti;
 const char* ssid = "ssid";
 const char* password = "password";
 
-String serverName = "ip-address:80/connect";
+String serverName = "<SERVER_IP_ADDRESS>:<SERVER_PORT>/connect";
 
 // Auxiliar variables to store the current output state
 String outputREDState = "off";

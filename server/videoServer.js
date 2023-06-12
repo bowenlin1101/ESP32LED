@@ -8,13 +8,16 @@ const readableStream = new Stream.Readable({
     }
 })
 
-http.get('http://192.168.0.87:8080/?action=stream', function (res) {
+const LOCALPORT = "http://<YOUR_LOCAL_IP_ADDRESS>:<YOUR_LOCAL_PORT>/?action=stream"
+const SERVERPORT = "http://<YOUR_SERVER_IP_ADDRESS>:<YOUR_SERVER_PORT>/video"
+
+http.get(LOCALPORT, function (res) {
     res.on('data', (chunk) => {
         readableStream.push(chunk)
     })
 })
 
-fetch("http://192.168.0.87:8000/video", {
+fetch(SERVERPORT, {
     method: 'POST',
     headers: {'Content-Type': 'multipart/x-mixed-replace'},
     body: readableStream,

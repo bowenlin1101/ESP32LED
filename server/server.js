@@ -5,12 +5,6 @@ import cors from 'cors';
 import Reactor from "./reactor.js";
 import Stream from 'stream'
 
-const readableStream = new Stream.Readable({
-    read(){
-        return true
-    }
-})
-
 const app = express();
 var reactor = new Reactor();
 
@@ -27,7 +21,14 @@ app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: false}));
 
-const PORT = 8000;
+const PORT = 80; //Change this to your desired SERVER_PORT
+//You can find your local ip address using "ip r" in the terminal if you are hosting this on your machine, or on your cloud server provider if you are hosting on the cloud
+
+const readableStream = new Stream.Readable({
+    read(){
+        return true
+    }
+})
 
 let LEDClients = [];
 let states = {red: false, blue: false, green: false}
@@ -78,7 +79,6 @@ function videoClientHandler(request, response) {
 
     request.on('close', () => {
         console.log(`Video Client: ${clientId} Connection closed`);
-        //remove video pipe
         readableStream.unpipe(response)
     });
 }
