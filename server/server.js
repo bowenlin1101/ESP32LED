@@ -3,6 +3,13 @@ import bodyParser from "body-parser";
 import * as path from 'path';
 import cors from 'cors';
 import Reactor from "./reactor.js";
+import Stream from 'stream'
+
+const readableStream = new Stream.Readable({
+    read(){
+        return true
+    }
+})
 
 const app = express();
 var reactor = new Reactor();
@@ -22,9 +29,10 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 const PORT = 8000;
 
-let clients = [];
+let LEDClients = [];
 let states = {red: false, blue: false, green: false}
-function eventsHandler(request, response, next) {
+
+function webClientHandler(request, response) {
     console.log("Webclient Connected")
     const headers = {
       'Content-Type': 'text/event-stream',
@@ -34,7 +42,6 @@ function eventsHandler(request, response, next) {
     response.writeHead(200, headers);
   
     const data = `data: ${JSON.stringify(states)}\n\n`;
-  
     response.write(data);
   
     const clientId = Date.now();
@@ -44,18 +51,50 @@ function eventsHandler(request, response, next) {
       response
     };
   
-    clients.push(newClient);
+    LEDClients.push(newClient);
   
     request.on('close', () => {
-      console.log(`${clientId} Connection closed`);
-      clients = clients.filter(client => client.id !== clientId);
+      console.log(`Web Client: ${clientId} Connection closed`);
+      LEDClients = LEDClients.filter(client => client.id !== clientId);
     });
 }
 
-app.get('/webClients', eventsHandler);
+function videoClientHandler(request, response) {
+    console.log("Video Connected")
+    const headers = {
+      'Content-Type': `multipart/x-mixed-replace;boundary=boundarydonotcross`,
+      'Connection': 'close',
+      'Cache-Control': 'private, no-cache, no-store, max-age=0',
+    };
+    response.writeHead(200, headers);
+    
+    const clientId = Date.now();
+    const newClient = {
+      id: clientId,
+      response
+    };
+  
+    readableStream.pipe(response)
+
+    request.on('close', () => {
+        console.log(`Video Client: ${clientId} Connection closed`);
+        //remove video pipe
+        readableStream.unpipe(response)
+    });
+}
+app.post('/video', (req,res,next) => {
+    console.log("Video source connected")
+    req.on('data', (chunk) => {
+       readableStream.push(chunk)
+    })
+})
+
+app.get('/videoClients', videoClientHandler);
+
+app.get('/webClients', webClientHandler);
 
 function sendEventsToAll() {
-    clients.forEach(client => client.response.write(`data: ${JSON.stringify(states)}\n\n`))
+    LEDClients.forEach(client => client.response.write(`data: ${JSON.stringify(states)}\n\n`))
 }
 
 app.get('/connect', (req,res) => {
