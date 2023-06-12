@@ -7,7 +7,7 @@ Steps to run
 
 3. On your local machine with webcam, install mjeg-streamer from "https://github.com/jacksonliam/mjpg-streamer"
 
-4. Run the command ```mjpg_streamer -i input_uvc.so -o "output_http.so -p <PORT> -l <YOUR_LOCAL_IP_ADDRESS>" to start the camera. Make sure to keep the local ip address and port in mind, as you will need it in step 5.
+4. Run the command ```mjpg_streamer -i input_uvc.so -o "output_http.so -p <PORT> -l <YOUR_LOCAL_IP_ADDRESS>"``` to start the camera. Make sure to keep the local ip address and port in mind, as you will need it in step 5.
 
 5. Go to server/videoServer.js and change the LOCALPORT to the ip and port in step 4 and SERVERPORT to the ip and port in step 2
 
